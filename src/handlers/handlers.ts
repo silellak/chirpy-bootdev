@@ -5,11 +5,18 @@ export function handlerReadiness(_req: express.Request, res: express.Response) {
   res.status(200).type("text/plain").send("OK");
 }
 
-export function handlerRequestCount(_req: express.Request, res: express.Response) {
-  return res.status(200).type("text/plain").send(`Hits: ${apiConfig.fileserverHits}`);
-}
-
 export function handlerResetMetrics(_req: express.Request, res: express.Response) {
   apiConfig.fileserverHits = 0;
   return res.status(200).type("text/plain").send("Metrics reset");
+}
+
+export function handlerRequestCount(_req: express.Request, res: express.Response) {
+  const adminMetricsTemplate = `<html>
+    <body>
+      <h1>Welcome, Chirpy Admin</h1>
+      <p>Chirpy has been visited ${apiConfig.fileserverHits} times!</p>
+    </body>
+  </html>`;
+
+  return res.status(200).type("text/html;charset=utf-8").send(adminMetricsTemplate);
 }
