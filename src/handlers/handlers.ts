@@ -1,5 +1,6 @@
 import express from "express";
 import { apiConfig } from "../config.js";
+import { BadRequestError } from "../error_types.js";
 
 export type ChirpParameters = {
   body: string;
@@ -30,24 +31,15 @@ export function handlerRequestCount(_req: express.Request, res: express.Response
 export function handlerValidateChirp(req: express.Request, res: express.Response) {
   const chirp: ChirpParameters = req.body;
 
-  try {
-      if (chirp.body && chirp.body.length > 140) {
-        return res.status(400).type("application/json").send(JSON.stringify({
-          "error": "Chirp is too long"
-        }));
-      }
+  if (chirp.body && chirp.body.length > 140) {
+    throw new BadRequestError("Chirp is too long. Max length is 140")
+  }
 
-      for (const word of prohibitedWords) {
-        chirp.body = chirp.body.replace(new RegExp(word, "gi"), "****");
-      }
+  for (const word of prohibitedWords) {
+    chirp.body = chirp.body.replace(new RegExp(word, "gi"), "****");
+  }
 
-      return res.status(200).type("application/json").send(JSON.stringify({
-        "cleanedBody": chirp.body
-      }));
-    } catch (error) {
-      const body = JSON.stringify({
-        "error": "Something went wrong"
-      });
-      return res.status(400).type("application/json").send(body);
-    }
+  return res.status(200).type("application/json").send(JSON.stringify({
+    "cleanedBody": chirp.body
+  }));
 }
