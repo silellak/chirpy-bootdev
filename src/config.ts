@@ -5,6 +5,7 @@ process.loadEnvFile()
 export type APIConfig = {
   fileserverHits: number;
   port: number;
+  platform?: string;
 };
 
 export type DBConfig = {
@@ -20,6 +21,7 @@ export type Config = {
 export const apiConfig: APIConfig = {
   fileserverHits: 0,
   port: parseInt(process.env.PORT || "8080"),
+  platform: process.env.PLATFORM || "dev",
 };
 
 export const migrationConfig: MigrationConfig = {
