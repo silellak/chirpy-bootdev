@@ -1,6 +1,6 @@
 import express from "express";
 import { BadRequestError } from "../error_types.js";
-import { createChirp } from "../db/queries/chirps.js";
+import { createChirp, getChirpById, getChirps } from "../db/queries/chirps.js";
 
 export type ChirpParameters = {
   body: string;
@@ -23,4 +23,24 @@ export async function handlerCreateChirp(req: express.Request, res: express.Resp
 
     // Here you would typically save the chirp to a database or perform other operations
     return res.status(201).type("application/json").send(JSON.stringify(newChirp));
+}
+
+export async function handlerGetChirps(req: express.Request, res: express.Response) {
+    const chirps = await getChirps();
+    return res.status(200).type("application/json").send(JSON.stringify(chirps));
+}
+
+export async function handleGetChirpById(req: express.Request, res: express.Response) {
+    const { chirpId } = req.params;
+    
+    if (typeof chirpId !== "string") {
+        return res.status(400).type("application/json").send(JSON.stringify({ error: "Invalid chirp ID" }));
+    }
+    const chirp = await getChirpById(chirpId);
+
+    if (!chirp) {
+        return res.status(404).type("application/json").send(JSON.stringify({ error: "Chirp not found" }));
+    }
+
+    return res.status(200).type("application/json").send(JSON.stringify(chirp));
 }
