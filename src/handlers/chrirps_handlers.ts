@@ -1,6 +1,8 @@
 import express from "express";
-import { BadRequestError } from "../error_types.js";
+import { BadRequestError, UnauthorizedError } from "../error_types.js";
 import { createChirp, getChirpById, getChirps } from "../db/queries/chirps.js";
+import { getBearerToken, validateJWT } from "../auth/auth.js";
+import { config } from "../config.js";
 
 export type ChirpParameters = {
   body: string;
@@ -9,6 +11,13 @@ export type ChirpParameters = {
 export const prohibitedWords: string[] = ["kerfuffle", "sharbert", "fornax"];
 
 export async function handlerCreateChirp(req: express.Request, res: express.Response) {
+    const jwtToken = getBearerToken(req);
+    const tokenUser = validateJWT(jwtToken || "", config.tokenSecret);
+
+    if (!tokenUser) {
+        throw new UnauthorizedError("Invalid or missing JWT token");
+    }
+
     const chirp = req.body;
 
     if (chirp.body && chirp.body.length > 140) {
@@ -18,6 +27,8 @@ export async function handlerCreateChirp(req: express.Request, res: express.Resp
     for (const word of prohibitedWords) {
         chirp.body = chirp.body.replace(new RegExp(word, "gi"), "****");
     }
+
+    chirp.userId = tokenUser; // Associate the chirp with the user from the JWT
 
     const newChirp = await createChirp(chirp);
 
@@ -34,12 +45,12 @@ export async function handleGetChirpById(req: express.Request, res: express.Resp
     const { chirpId } = req.params;
     
     if (typeof chirpId !== "string") {
-        return res.status(400).type("application/json").send(JSON.stringify({ error: "Invalid chirp ID" }));
+        throw new BadRequestError("Invalid chirp ID");
     }
     const chirp = await getChirpById(chirpId);
 
     if (!chirp) {
-        return res.status(404).type("application/json").send(JSON.stringify({ error: "Chirp not found" }));
+        throw new BadRequestError("Chirp not found");
     }
 
     return res.status(200).type("application/json").send(JSON.stringify(chirp));

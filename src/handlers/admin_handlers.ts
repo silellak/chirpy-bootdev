@@ -1,6 +1,6 @@
 import express from "express";
 import { apiConfig } from "../config.js";
-import { BadRequestError } from "../error_types.js";
+import { BadRequestError, ForbiddenError } from "../error_types.js";
 import { deleteAllUsers } from "../db/queries/users.js";
 
 export type ChirpParameters = {
@@ -18,7 +18,7 @@ export function handlerResetMetrics(_req: express.Request, res: express.Response
 
     res.status(200).type("text/plain").send("Metrics reset");
   } else {
-    res.status(403).type("text/plain").send("Forbidden");
+    throw new ForbiddenError("Resetting metrics is only allowed in DEV environment");
   }
 }
 

@@ -16,6 +16,7 @@ export type DBConfig = {
 export type Config = {
   api: APIConfig;
   db: DBConfig;
+  tokenSecret: string;
 }
 
 export const apiConfig: APIConfig = {
@@ -34,4 +35,5 @@ export const config : Config = {
     url: process.env.DB_URL || "",
     migrationConfig: migrationConfig,
   },
+  tokenSecret: process.env.TOKEN_SECRET || "",
 };
