@@ -7,7 +7,7 @@ import postgres from "postgres";
 import { config } from "./config.js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { handlerCreateUser } from "./handlers/user_handlers.js";
+import { handlerCreateUser, handlerUpdateUser } from "./handlers/user_handlers.js";
 import { handleGetChirpById, handlerCreateChirp, handlerGetChirps } from "./handlers/chrirps_handlers.js";
 import { handlerLogin, handlerRefresh, handlerRevokeRefreshToken } from "./handlers/login_handlers.js";
 
@@ -33,6 +33,8 @@ app.post("/api/chirps", handlerCreateChirp);
 app.post("/api/login", handlerLogin);
 app.post("/api/refresh", handlerRefresh);
 app.post("/api/revoke", handlerRevokeRefreshToken);
+
+app.put("/api/users", handlerUpdateUser);
 
 
 app.use(middlewareHandleError);

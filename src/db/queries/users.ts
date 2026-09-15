@@ -19,3 +19,12 @@ export async function getUserByEmail(email: string) {
 export async function deleteAllUsers() {
   await db.delete(users).execute();
 }
+
+export async function updateUser(userId: string, updatedFields: Partial<NewUser>) {
+  const [updatedUser] = await db
+    .update(users)
+    .set(updatedFields)
+    .where(eq(users.id, userId))
+    .returning();
+  return updatedUser;
+}
