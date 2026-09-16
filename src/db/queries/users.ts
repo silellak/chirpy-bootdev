@@ -28,3 +28,12 @@ export async function updateUser(userId: string, updatedFields: Partial<NewUser>
     .returning();
   return updatedUser;
 }
+
+export async function upgradeUserToCirpyRed(userId: string) {
+  const [updatedUser] = await db
+    .update(users)
+    .set({ isChirpyRed: true })
+    .where(eq(users.id, userId))
+    .returning();
+  return updatedUser;
+}

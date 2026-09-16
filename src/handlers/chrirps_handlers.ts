@@ -1,6 +1,6 @@
 import express from "express";
-import { BadRequestError, UnauthorizedError } from "../error_types.js";
-import { createChirp, getChirpById, getChirps } from "../db/queries/chirps.js";
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "../error_types.js";
+import { createChirp, deleteChirpById, getChirpById, getChirps } from "../db/queries/chirps.js";
 import { getBearerToken, validateJWT } from "../auth/auth.js";
 import { config } from "../config.js";
 
@@ -50,8 +50,45 @@ export async function handleGetChirpById(req: express.Request, res: express.Resp
     const chirp = await getChirpById(chirpId);
 
     if (!chirp) {
-        throw new BadRequestError("Chirp not found");
+        throw new NotFoundError("Chirp not found");
     }
 
     return res.status(200).type("application/json").send(JSON.stringify(chirp));
+}
+
+export async function handleDeleteChirpById(req: express.Request, res: express.Response) {
+    const { chirpId } = req.params;
+
+    if (typeof chirpId !== "string") {
+        throw new NotFoundError("Invalid chirp ID");
+    }
+
+    const jwtToken = getBearerToken(req);
+    const userId = await validateJWT(jwtToken || "", config.tokenSecret);
+
+    if (userId == null) {
+        throw new UnauthorizedError("Invalid or missing JWT token");
+    }
+
+    if (!userId) {
+        throw new ForbiddenError("User not authorized to delete this chirp");
+    }
+
+    const chirpToDelete = await getChirpById(chirpId);
+
+    if (!chirpToDelete) {
+        throw new NotFoundError("Chirp not found");
+    }
+
+    if (chirpToDelete.userId !== userId) {
+        throw new ForbiddenError("User not authorized to delete this chirp");
+    }
+
+    const deletedChirp = await deleteChirpById(chirpId);
+
+    if (!deletedChirp) {
+        throw new NotFoundError("Chirp not found or could not be deleted");
+    }
+
+    return res.status(204).send();
 }
