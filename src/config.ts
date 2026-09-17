@@ -6,6 +6,7 @@ export type APIConfig = {
   fileserverHits: number;
   port: number;
   platform?: string;
+  polkaKey?: string;
 };
 
 export type DBConfig = {
@@ -23,6 +24,7 @@ export const apiConfig: APIConfig = {
   fileserverHits: 0,
   port: parseInt(process.env.PORT || "8080"),
   platform: process.env.PLATFORM || "dev",
+  polkaKey: process.env.POLKA_KEY || "",
 };
 
 export const migrationConfig: MigrationConfig = {

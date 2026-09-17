@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { checkPasswordHash, getBearerToken, hashPassword, makeJWT, validateJWT } from "./auth.js";
+import { checkPasswordHash, getAPIKey, getBearerToken, hashPassword, makeJWT, validateJWT } from "./auth.js";
 import express from "express";
 
 describe("Password Hashing", () => {
@@ -76,5 +76,27 @@ describe("Get JWT From Request", () => {
 
     const token = getBearerToken(req);
     expect(token).toBeNull();
+  });
+});
+
+describe("Get API Key From Request", () => {
+  it("should return the API key from the Authorization header", () => {
+    const req = {
+      headers: {
+        authorization: "ApiKey myapikey123",
+      },
+    } as express.Request;
+
+    const apiKey = getAPIKey(req);
+    expect(apiKey).toBe("myapikey123");
+  });
+
+  it("should return null if the Authorization header is missing", () => {
+    const req = {
+      headers: {},
+    } as express.Request;
+
+    const apiKey = getAPIKey(req);
+    expect(apiKey).toBeNull();
   });
 });

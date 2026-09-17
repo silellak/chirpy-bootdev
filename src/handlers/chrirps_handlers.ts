@@ -1,6 +1,6 @@
 import express from "express";
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "../error_types.js";
-import { createChirp, deleteChirpById, getChirpById, getChirps } from "../db/queries/chirps.js";
+import { createChirp, deleteChirpById, getChirpById, getChirps, getChirpsByUserId } from "../db/queries/chirps.js";
 import { getBearerToken, validateJWT } from "../auth/auth.js";
 import { config } from "../config.js";
 
@@ -37,8 +37,14 @@ export async function handlerCreateChirp(req: express.Request, res: express.Resp
 }
 
 export async function handlerGetChirps(req: express.Request, res: express.Response) {
-    const chirps = await getChirps();
-    return res.status(200).type("application/json").send(JSON.stringify(chirps));
+    const authorId = req.query.authorId as string | undefined;
+    if (authorId) {
+        const chirpsByAuthor = await getChirpsByUserId(authorId);
+        return res.status(200).type("application/json").send(JSON.stringify(chirpsByAuthor));
+    } else {
+        const chirps = await getChirps();
+        return res.status(200).type("application/json").send(JSON.stringify(chirps));
+    }
 }
 
 export async function handleGetChirpById(req: express.Request, res: express.Response) {

@@ -2,6 +2,7 @@ import * as argon2 from "argon2";import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
 import express from "express";
 import crypto from "crypto";
+import { config } from "../config.js";
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
@@ -55,4 +56,13 @@ export function getRefreshToken(req: express.Request): string | null {
 
 export function makeRefreshToken(): string {
     return crypto.randomBytes(32).toString("hex");
+}
+
+export function getAPIKey(req: express.Request): string | null {
+    const apiKey = req.headers.authorization?.split(" ")[1];
+
+    if (!apiKey || typeof apiKey !== "string") {
+        return null;
+    }
+    return apiKey;
 }
