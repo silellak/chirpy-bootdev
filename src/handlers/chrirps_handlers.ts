@@ -38,11 +38,18 @@ export async function handlerCreateChirp(req: express.Request, res: express.Resp
 
 export async function handlerGetChirps(req: express.Request, res: express.Response) {
     const authorId = req.query.authorId as string | undefined;
+    const sort = req.query.sort as string | undefined;
+
     if (authorId) {
         const chirpsByAuthor = await getChirpsByUserId(authorId);
         return res.status(200).type("application/json").send(JSON.stringify(chirpsByAuthor));
     } else {
         const chirps = await getChirps();
+        if (sort === "desc") {
+            chirps.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        } else {
+            chirps.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        }
         return res.status(200).type("application/json").send(JSON.stringify(chirps));
     }
 }
